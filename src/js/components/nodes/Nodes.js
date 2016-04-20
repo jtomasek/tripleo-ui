@@ -18,12 +18,6 @@ class Nodes extends React.Component {
     this.props.dispatch(RolesActions.fetchRoles());
   }
 
-  refreshResults(e) {
-    e.preventDefault();
-    this.props.dispatch(NodesActions.fetchNodes());
-    this.props.dispatch(RolesActions.fetchRoles());
-  }
-
   introspectNodes() {
     this.props.dispatch(NodesActions.introspectNodes());
   }
@@ -34,10 +28,6 @@ class Nodes extends React.Component {
         <div className="col-sm-12">
           <div className="page-header">
             <div className="pull-right">
-              <a href="" onClick={this.refreshResults.bind(this)}>
-                <span className="pficon pficon-refresh"></span> Refresh Results
-              </a>
-              &nbsp;
               <Link to="/nodes/registered/register"
                     className="btn btn-primary">
                 <span className="fa fa-plus"/> Register Nodes
