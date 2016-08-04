@@ -1,8 +1,10 @@
 import { browserHistory } from 'react-router';
+
 import NotificationActions from '../actions/NotificationActions';
 import ParametersConstants from '../constants/ParametersConstants';
-import TripleOApiService from '../services/TripleOApiService';
-import TripleOApiErrorHandler from '../services/TripleOApiErrorHandler';
+import MistralApiService from '../services/MistralApiService';
+import MistralApiErrorHandler from '../services/MistralApiErrorHandler';
+import { parseParameters } from '../services/parametersParser';
 
 export default {
   fetchParametersPending() {
@@ -27,17 +29,22 @@ export default {
   fetchParameters(planName) {
     return dispatch => {
       dispatch(this.fetchParametersPending());
-      TripleOApiService.getPlanParameters(planName).then(response => {
-        dispatch(this.fetchParametersSuccess(response.parameters));
+      // TripleOApiService.getPlanParameters(planName).then(response => {
+      MistralApiService.runAction('tripleo.get_parameters', { container: planName })
+      .then(response => {
+        const parameters = JSON.parse(response.output).result;
+        console.log(parseParameters(parameters).toJS());
+        dispatch(this.fetchParametersSuccess(parameters));
       }).catch(error => {
         dispatch(this.fetchParametersFailed());
-        let errorHandler = new TripleOApiErrorHandler(error);
+        let errorHandler = new MistralApiErrorHandler(error);
         errorHandler.errors.forEach((error) => {
           dispatch(NotificationActions.notify(error));
         });
       });
     };
   },
+
 
   updateParametersPending() {
     return {
@@ -65,7 +72,10 @@ export default {
   updateParameters(planName, data, inputFieldNames, url) {
     return dispatch => {
       dispatch(this.updateParametersPending());
-      TripleOApiService.updatePlanParameters(planName, data).then(response => {
+      // TripleOApiService.updatePlanParameters(planName, data).then(response => {
+      MistralApiService.runAction('tripleo.update_parameters',
+                                  { container: planName, parameters: data })
+      .then(response => {
         dispatch(this.updateParametersSuccess(response.parameters));
         dispatch(NotificationActions.notify({
           title: 'Parameters updated',
@@ -74,7 +84,7 @@ export default {
         }));
         browserHistory.push(url);
       }).catch(error => {
-        let errorHandler = new TripleOApiErrorHandler(error, inputFieldNames);
+        let errorHandler = new MistralApiErrorHandler(error, inputFieldNames);
         dispatch(this.updateParametersFailed(errorHandler.errors, errorHandler.formFieldErrors));
       });
     };
