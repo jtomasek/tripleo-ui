@@ -3,6 +3,28 @@ import { fromJS, Map } from 'immutable';
 import { Parameter } from '../immutableRecords/parameters';
 
 /**
+* Turns Immutable Map into List and adds Map's key as a specified property
+*/
+const mapToList = (map, newProp) => {
+  return map.map((v, k) => v.set(newProp, k)).toList();
+};
+
+/**
+ * converts Heat validate response into tree of Map Lists so it can be normalized
+ */
+export const arrayify = heatResponseTree => {
+  return heatResponseTree.map((item, key) => {
+    if (key === 'Parameters') {
+      return mapToList(item, 'id');
+    } else if (key === 'NestedParameters') {
+      return mapToList(item, 'id').map(item => arrayify(item));
+    } else {
+      return item;
+    }
+  });
+};
+
+/**
  * Transforms Heat validate output into a sane parameters object
  */
 export const parseParameters = heatResponse => {

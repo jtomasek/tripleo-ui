@@ -1,10 +1,13 @@
 import { browserHistory } from 'react-router';
+import { fromJS } from 'immutable';
+import { normalize } from 'normalizr';
 
 import NotificationActions from '../actions/NotificationActions';
 import ParametersConstants from '../constants/ParametersConstants';
 import MistralApiService from '../services/MistralApiService';
 import MistralApiErrorHandler from '../services/MistralApiErrorHandler';
-import { parseParameters } from '../services/parametersParser';
+import { arrayify } from '../services/parametersParser';
+import { resourceGroupSchema } from '../normalizrSchemas/parameters';
 
 export default {
   fetchParametersPending() {
@@ -32,8 +35,12 @@ export default {
       // TripleOApiService.getPlanParameters(planName).then(response => {
       MistralApiService.runAction('tripleo.get_parameters', { container: planName })
       .then(response => {
-        console.log(JSON.parse(response.output).result);
-        const parameters = parseParameters(JSON.parse(response.output).result);
+        // console.log(JSON.parse(response.output).result);
+        const rootResourceGroup = arrayify(fromJS(JSON.parse(response.output).result)).toJS();
+        const normalizedResponse = normalize(rootResourceGroup, resourceGroupSchema);
+        console.log(normalizedResponse);
+        // console.log(abc.toJS());
+        // const parameters = parseParameters(JSON.parse(response.output).result);
         dispatch(this.fetchParametersSuccess(parameters));
       }).catch(error => {
         dispatch(this.fetchParametersFailed());
