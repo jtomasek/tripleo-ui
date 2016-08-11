@@ -32,11 +32,12 @@ export default {
       // TripleOApiService.getPlanParameters(planName).then(response => {
       MistralApiService.runAction('tripleo.get_parameters', { container: planName })
       .then(response => {
-        const parameters = JSON.parse(response.output).result;
-        console.log(parseParameters(parameters).toJS());
+        console.log(JSON.parse(response.output).result);
+        const parameters = parseParameters(JSON.parse(response.output).result);
         dispatch(this.fetchParametersSuccess(parameters));
       }).catch(error => {
         dispatch(this.fetchParametersFailed());
+        console.error('Error in ParametersActions.fetchParameters', error.stack || error); //eslint-disable-line no-console
         let errorHandler = new MistralApiErrorHandler(error);
         errorHandler.errors.forEach((error) => {
           dispatch(NotificationActions.notify(error));
@@ -73,8 +74,9 @@ export default {
     return dispatch => {
       dispatch(this.updateParametersPending());
       // TripleOApiService.updatePlanParameters(planName, data).then(response => {
+      const dataa = {CloudName: 'overcloud122'};
       MistralApiService.runAction('tripleo.update_parameters',
-                                  { container: planName, parameters: data })
+                                  { container: planName, parameters: dataa })
       .then(response => {
         dispatch(this.updateParametersSuccess(response.parameters));
         dispatch(NotificationActions.notify({
