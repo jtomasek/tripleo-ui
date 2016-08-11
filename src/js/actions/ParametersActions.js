@@ -32,8 +32,8 @@ export default {
       // TripleOApiService.getPlanParameters(planName).then(response => {
       MistralApiService.runAction('tripleo.get_parameters', { container: planName })
       .then(response => {
-        const parameters = JSON.parse(response.output).result;
-        console.log(parseParameters(parameters).toJS());
+        const parameters = parseParameters(JSON.parse(response.output).result);
+        console.log(parameters.toJS());
         dispatch(this.fetchParametersSuccess(parameters));
       }).catch(error => {
         dispatch(this.fetchParametersFailed());

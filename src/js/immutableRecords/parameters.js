@@ -11,11 +11,9 @@ export const ParametersDefaultState = Record({
 
 export const Parameter = Record({
   Default: undefined,
-  Description: '',
+  Description: undefined,
   Label: undefined,
-  Name: '',
+  Name: undefined,
   NoEcho: undefined,
-  Parameters: undefined,
-  NestedParameters: undefined,
-  Type: ''
+  Type: 'String'
 });

@@ -22,10 +22,17 @@ export default class ParameterTree extends React.Component {
           <div className="col-sm-4 sidebar-pf sidebar-pf-left">
             <div className="treeview">
               <ul className="list-group">
-                <ResourceGroupTab name="RootParameters"
-                                  description={this.props.parameters.get('Description')}
+                <ResourceGroupTab key="generalParameters"
+                                  name="General Parameters"
+                                  description="General Parameters"
                                   level={0}
-                                  nestedParameters={this.props.parameters.get(
+                                  activateTab={this.activateTab.bind(this)}
+                                  activeTab={this.state.activeTab}/>
+                <ResourceGroupTab key="roles"
+                                  name="General Parameters"
+                                  description=""
+                                  level={0}
+                                  nestedGroups={this.props.parameterTree.get(
                                     'NestedParameters').toJS()}
                                   activateTab={this.activateTab.bind(this)}
                                   activeTab={this.state.activeTab}/>
@@ -33,11 +40,11 @@ export default class ParameterTree extends React.Component {
             </div>
           </div>
           <div className="col-sm-8">
-            <ParametersTabPane name="RootParameters"
+            {/* <ParametersTabPane name="RootParameters"
                                activeTab={this.state.activeTab}
                                nestedParameters={this.props.parameters.get(
                                 'NestedParameters').toJS()}
-                               parameters={this.props.parameters.get('Parameters').toJS()}/>
+                               parameters={this.props.parameters.get('Parameters').toJS()}/> */}
           </div>
         </div>
       </div>
@@ -45,5 +52,5 @@ export default class ParameterTree extends React.Component {
   }
 }
 ParameterTree.propTypes = {
-  parameters: React.PropTypes.object
+  parameterTree: React.PropTypes.object
 };
