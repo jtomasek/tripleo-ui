@@ -8,7 +8,7 @@ import LoginConstants from '../constants/LoginConstants';
 import ZaqarWebSocketService from '../services/ZaqarWebSocketService';
 import logger from '../services/logger';
 
-export default {
+const LoginActions = {
   authenticateUserViaToken(keystoneAuthTokenId, nextPath) {
     return (dispatch, getState) => {
       dispatch(this.userAuthStarted());
@@ -82,3 +82,5 @@ export default {
     };
   }
 };
+
+export default LoginActions;
