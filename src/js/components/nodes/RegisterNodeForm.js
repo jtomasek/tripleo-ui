@@ -26,6 +26,10 @@ export default class RegisterNodeForm extends React.Component {
                     characters, to wit: ALPHA / DIGIT / "-" / "." / "_" / "~"`,
       maxLength: 'Node name can have up to 255 characters'
     };
+    this.isJson = (values, value) => {
+      try { return !!JSON.parse(value); }
+      catch(e) { return false; }
+    };
   }
 
   onNodeFormValidSubmit(formData, resetForm, invalidateForm) {
