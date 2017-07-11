@@ -14,15 +14,20 @@
  * under the License.
  */
 
+import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
+import { getEnabledLanguages } from '../selectors/i18n';
+import LoginActions from '../actions/LoginActions';
 import NavTab from './ui/NavTab';
 import I18nDropdown from './i18n/I18nDropdown';
 import StatusDropdown from './StatusDropdown';
+import ValidationsActions from '../actions/ValidationsActions';
+import ValidationsList from './validations/ValidationsList';
 
 import TripleoOwlSvg from '../../img/tripleo-owl-navbar.svg';
 
@@ -49,10 +54,10 @@ const messages = defineMessages({
   }
 });
 
-export default class NavBar extends React.Component {
+class NavBar extends React.Component {
   logout(e) {
     e.preventDefault();
-    this.props.onLogout();
+    this.props.logoutUser();
   }
 
   _renderLanguageDropdown() {
@@ -75,64 +80,93 @@ export default class NavBar extends React.Component {
 
   render() {
     return (
-      <nav
-        className="navbar navbar-default navbar-pf navbar-fixed-top"
-        role="navigation"
-      >
-        <div className="navbar-header">
-          <button
-            type="button"
-            className="navbar-toggle collapsed"
-            data-toggle="collapse"
-            data-target="#tripleo-navbar-collapse"
-            aria-expanded="false"
+      <header>
+        <nav
+          className="navbar navbar-default navbar-pf navbar-fixed-top"
+          role="navigation"
+        >
+          <div className="navbar-header">
+            <button
+              type="button"
+              className="navbar-toggle collapsed"
+              data-toggle="collapse"
+              data-target="#tripleo-navbar-collapse"
+              aria-expanded="false"
+            >
+              <span className="sr-only">
+                <FormattedMessage {...messages.toggleNavigation} />
+              </span>
+              <span className="icon-bar" />
+              <span className="icon-bar" />
+              <span className="icon-bar" />
+            </button>
+            <Link className="navbar-brand" to="/" id="NavBar__indexLink">
+              <img src={TripleoOwlSvg} alt="TripleO" />
+            </Link>
+          </div>
+          <div
+            className="navbar-collapse collapse"
+            id="tripleo-navbar-collapse"
           >
-            <span className="sr-only">
-              <FormattedMessage {...messages.toggleNavigation} />
-            </span>
-            <span className="icon-bar" />
-            <span className="icon-bar" />
-            <span className="icon-bar" />
-          </button>
-          <Link className="navbar-brand" to="/" id="NavBar__indexLink">
-            <img src={TripleoOwlSvg} alt="TripleO" />
-          </Link>
-        </div>
-        <div className="navbar-collapse collapse" id="tripleo-navbar-collapse">
-          <ul className="nav navbar-nav navbar-utility">
-            <li>
-              <a id="NavBar__username">
-                <span className="pficon pficon-user" />
-                {this.props.user.get('name')}
-              </a>
-            </li>
-            {this._renderLanguageDropdown()}
-            {this._renderHelpDropdown()}
-            <li>
-              <a
-                href="#"
-                onClick={this.logout.bind(this)}
-                id="NavBar__logoutLink"
-              >
-                <FormattedMessage {...messages.logoutLink} />
-              </a>
-            </li>
-          </ul>
-          <ul className="nav navbar-nav navbar-primary">
-            <NavTab to="/plans" id="NavBar__PlansTab">
-              <FormattedMessage {...messages.plansTab} />
-            </NavTab>
-            <NavTab to="/nodes" id="NavBar__nodesTab">
-              <FormattedMessage {...messages.nodesTab} />
-            </NavTab>
-          </ul>
-        </div>
-      </nav>
+            <ul className="nav navbar-nav navbar-utility">
+              <li>
+                <a id="NavBar__username">
+                  <span className="pficon pficon-user" />
+                  {this.props.user.get('name')}
+                </a>
+              </li>
+              {this._renderLanguageDropdown()}
+              {this._renderHelpDropdown()}
+              <li>
+                <a className="link" onClick={this.props.toggleValidations}>
+                  <span className="pficon pficon-ok" /> 1
+                  {' '}
+                  <span className="pficon pficon-warning-triangle-o" /> 2
+                  {' '}
+                  <span className="pficon pficon-error-circle-o" /> 3
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={this.logout.bind(this)}
+                  id="NavBar__logoutLink"
+                >
+                  <FormattedMessage {...messages.logoutLink} />
+                </a>
+              </li>
+            </ul>
+            <ul className="nav navbar-nav navbar-primary">
+              <NavTab to="/plans" id="NavBar__PlansTab">
+                <FormattedMessage {...messages.plansTab} />
+              </NavTab>
+              <NavTab to="/nodes" id="NavBar__nodesTab">
+                <FormattedMessage {...messages.nodesTab} />
+              </NavTab>
+            </ul>
+          </div>
+          <ValidationsList />
+        </nav>
+      </header>
     );
   }
 }
 NavBar.propTypes = {
   languages: ImmutablePropTypes.map.isRequired,
-  onLogout: PropTypes.func.isRequired,
+  logoutUser: PropTypes.func.isRequired,
+  showValidations: PropTypes.bool.isRequired,
+  toggleValidations: PropTypes.func.isRequired,
   user: ImmutablePropTypes.map
 };
+
+const mapStateToProps = state => ({
+  languages: getEnabledLanguages(state),
+  showValidations: state.validations.showValidations,
+  user: state.login.getIn(['token', 'user'])
+});
+const mapDispatchToProps = dispatch => ({
+  logoutUser: () => dispatch(LoginActions.logoutUser()),
+  toggleValidations: () => dispatch(ValidationsActions.toggleValidations())
+});
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NavBar));
